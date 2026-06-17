@@ -1,0 +1,65 @@
+# VoltEdge — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# Core framework
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Data
+pandas>=2.0.0
+numpy>=1.24.0
+pyarrow>=14.0.0
+scikit-learn>=1.3.0
+scipy>=1.11.0
+
+# Causal AI
+networkx>=3.2.0
+
+# ML (optional — needed for LSTM)
+# tensorflow>=2.15.0
+
+# API & streaming
+httpx>=0.26.0
+python-multipart>=0.0.6
+
+# Auth
+bcrypt>=4.0.0
+python-jose[cryptography]>=3.3.0
+
+# Dashboard
+dash>=2.14.0
+dash-bootstrap-components>=1.5.0
+plotly>=5.18.0
+
+# Storage
+boto3>=1.34.0          # AWS S3
+moto[s3]>=4.2.0       # S3 mock for tests
+
+# ESG PDF
+reportlab>=4.0.0
+
+# Alerts
+httpx>=0.26.0          # already listed — Slack/PagerDuty webhooks
+
+# DB (RBAC + OEM)
+sqlalchemy>=2.0.0
+
+# IoT
+paho-mqtt>=1.6.0
+
+# Observability
+structlog>=23.0.0
+
+# Scheduling
+apscheduler>=3.10.0
+
+# CI/CD test support
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+pyyaml>=6.0.0
+
+# Optional: MQTT broker for integration tests
+# mosquitto (system package)

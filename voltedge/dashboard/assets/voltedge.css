@@ -1,0 +1,369 @@
+/* ── VoltEdge Design System v1.6 ────────────────────────────────── */
+
+/* ── Light theme ─────────────────────────────────────────────────── */
+:root {
+  --bg-primary:    #f3f5f8;
+  --bg-card:       #ffffff;
+  --bg-sidebar:    #f8f9fb;
+  --bg-input:      #ffffff;
+  --border:        rgba(15,23,42,0.08);
+  --border-strong: rgba(15,23,42,0.20);
+  --text-primary:  #111827;
+  --text-muted:    #4b5563;
+  --text-dim:      #9aa1ad;
+  --teal:          #1D9E75;
+  --teal-hover:    #178a64;
+  --teal-light:    #e8f8f2;
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md:     0 4px 12px rgba(0,0,0,0.08);
+  --ctrl-h:        26px;
+  --ctrl-font:     0.74rem;
+  --ctrl-pad:      0 12px;
+  --radius-pill:   100px;
+  --radius-card:   14px;
+  --transition:    0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Dark theme ───────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg-primary:    #0c111a;
+  --bg-card:       #1c2438;
+  --bg-sidebar:    #131925;
+  --bg-input:      #1e2d47;
+  --border:        rgba(255,255,255,0.10);
+  --border-strong: rgba(255,255,255,0.25);
+  --text-primary:  #f1f5ff;
+  --text-muted:    #b4c1d8;
+  --text-dim:      #6b7fa0;
+  --teal:          #22c990;
+  --teal-light:    rgba(34,201,144,0.14);
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.4);
+  --shadow-md:     0 4px 18px rgba(0,0,0,0.55);
+}
+
+/* ── Base ────────────────────────────────────────────────────────── */
+html, body { background: var(--bg-primary) !important; color: var(--text-primary) !important; -webkit-font-smoothing: antialiased; }
+
+/* ── Shell ───────────────────────────────────────────────────────── */
+#vt-root     { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg-primary); }
+.vt-body-row { flex: 1; display: flex; flex-direction: row; align-items: stretch; }
+.vt-content  { flex: 1; min-width: 0; padding: 20px; display: flex; flex-direction: column; }
+.vt-pages    { flex: 1; }
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+.vt-footer   { color: var(--text-dim); font-size: 0.69rem; text-align: center; padding: 16px 0 20px; border-top: 0.5px solid var(--border); margin-top: 24px; }
+.vt-footer a { color: var(--teal) !important; text-decoration: none !important; }
+.vt-footer a:hover { text-decoration: underline !important; }
+
+/* ── Navbar ──────────────────────────────────────────────────────── */
+.vt-navbar { background: var(--bg-card) !important; border-bottom: 0.5px solid var(--border) !important; padding: 10px 20px !important; position: sticky; top: 0; z-index: 100; }
+/* VoltEdge brand text — explicit so it works in dark mode */
+.vt-navbar .vt-brand-text { color: var(--text-primary) !important; font-size: 1.05rem; font-weight: 600; margin-left: 8px; letter-spacing: -0.3px; }
+[data-theme="dark"] .vt-navbar .vt-brand-text { color: var(--text-primary) !important; }
+[data-theme="dark"] .vt-navbar * { color: var(--text-primary); }
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+.vt-sidebar { background: var(--bg-sidebar) !important; border-right: 0.5px solid var(--border) !important; }
+[data-theme="dark"] .vt-sidebar { background: var(--bg-sidebar) !important; }
+.sidebar-navlink { color: var(--text-muted) !important; border-radius: 10px !important; padding: 7px 12px !important; font-size: 0.81rem; transition: background var(--transition), color var(--transition); text-decoration: none !important; border: none !important; background: transparent !important; width: 100%; display: flex; align-items: center; margin-bottom: 2px; }
+.sidebar-navlink:hover { background: var(--teal-light) !important; color: var(--teal) !important; }
+.sidebar-navlink.active-nav { background: var(--teal-light) !important; color: var(--teal) !important; font-weight: 500 !important; }
+.sidebar-section-label { color: var(--text-dim) !important; }
+
+/* ── Section labels (TIME WINDOW, AI LAYERS etc.) ────────────────── */
+.vt-section-label { color: var(--text-muted) !important; }
+[data-theme="dark"] .vt-section-label { color: var(--text-muted) !important; }
+
+/* ── Cards ───────────────────────────────────────────────────────── */
+.card { background: var(--bg-card) !important; border: 0.5px solid var(--border) !important; border-radius: var(--radius-card) !important; box-shadow: var(--shadow-sm) !important; }
+[data-theme="dark"] .card { background: var(--bg-card) !important; border-color: var(--border) !important; }
+/* Force ALL text inside cards to use CSS variable in dark mode */
+[data-theme="dark"] .card,
+[data-theme="dark"] .card span,
+[data-theme="dark"] .card small,
+[data-theme="dark"] .card p,
+[data-theme="dark"] .card div,
+[data-theme="dark"] .card h3,
+[data-theme="dark"] .card h4,
+[data-theme="dark"] .card label { color: var(--text-primary) !important; }
+/* Restore intent-specific colours */
+[data-theme="dark"] .card .trend-up   { color: #E24B4A !important; }
+[data-theme="dark"] .card .trend-down { color: #22c990 !important; }
+[data-theme="dark"] .card .trend-flat { color: var(--text-dim) !important; }
+[data-theme="dark"] .card .bi { color: inherit; }
+
+/* ── KPI wrappers ─────────────────────────────────────────────────── */
+.kpi-wrapper { cursor: pointer; border-radius: var(--radius-card); transition: transform var(--transition); height: 100%; }
+.kpi-wrapper:hover { transform: translateY(-2px); }
+.kpi-wrapper:hover .card { box-shadow: var(--shadow-md) !important; border-color: var(--teal) !important; }
+
+/* ── Trend ───────────────────────────────────────────────────────── */
+.trend-up   { color: #E24B4A; font-size: 0.71rem; font-weight: 500; }
+.trend-down { color: #1D9E75; font-size: 0.71rem; font-weight: 500; }
+.trend-flat { color: var(--text-dim); font-size: 0.71rem; }
+
+/* ── Charts — explicit card background in dark mode ─────────────── */
+[data-theme="dark"] .js-plotly-plot .bg        { fill: var(--bg-card) !important; }
+[data-theme="dark"] .js-plotly-plot .bglayer rect { fill: var(--bg-card) !important; }
+[data-theme="dark"] .js-plotly-plot text       { fill: var(--text-primary) !important; }
+[data-theme="dark"] .js-plotly-plot .xtick text,
+[data-theme="dark"] .js-plotly-plot .ytick text { fill: var(--text-muted) !important; }
+[data-theme="dark"] .js-plotly-plot .legendtext { fill: var(--text-muted) !important; }
+[data-theme="dark"] .js-plotly-plot .gridlayer path { stroke: rgba(255,255,255,0.07) !important; }
+
+/* ── Anomaly threshold slider ─────────────────────────────────────── */
+/* RC Slider renders tooltip in a React portal at body level.
+   tooltip=False suppresses it at the component level.
+   These rules are belt-and-braces for any lingering renders. */
+.rc-slider-tooltip { opacity: 0 !important; display: none !important; pointer-events: none !important; }
+.rc-slider-tooltip-content { display: none !important; }
+.rc-slider-tooltip-inner { display: none !important; }
+/* Kill Dash's built-in value box */
+.dash-slider-container output,
+.dash-slider-container input,
+.dash-slider-container input[readonly] {
+  display: none !important; width: 0 !important; height: 0 !important;
+}
+/* Slider track / rail / handle in dark mode */
+[data-theme="dark"] .rc-slider-track  { background: var(--teal) !important; }
+[data-theme="dark"] .rc-slider-rail   { background: rgba(255,255,255,0.15) !important; }
+[data-theme="dark"] .rc-slider-handle { border-color: var(--teal) !important; background: #fff !important; }
+/* Slider mark labels */
+.rc-slider-mark-text { color: var(--text-muted) !important; font-size: 0.71rem !important; }
+[data-theme="dark"] .rc-slider-mark-text { color: var(--text-muted) !important; }
+[data-theme="dark"] .rc-slider-dot { background: var(--bg-card) !important; border-color: var(--border-strong) !important; }
+[data-theme="dark"] .rc-slider-dot-active { border-color: var(--teal) !important; }
+
+/* ── Threshold pill ──────────────────────────────────────────────── */
+#threshold-value-pill {
+  height: var(--ctrl-h); padding: 0 14px; font-size: var(--ctrl-font); font-weight: 600;
+  border-radius: var(--radius-pill); border: 0.5px solid var(--border-strong);
+  background: var(--bg-card); color: var(--text-primary);
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 52px; margin-left: 10px; flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+[data-theme="dark"] #threshold-value-pill {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-strong) !important;
+}
+
+/* ── Dropdowns — Dash 4 class names ─────────────────────────────── */
+[data-theme="dark"] .dash-dropdown-wrapper { background: var(--bg-input) !important; border-radius: 8px; }
+[data-theme="dark"] .dash-dropdown-value,
+[data-theme="dark"] .dash-dropdown-value-item { color: var(--text-primary) !important; background: transparent !important; }
+[data-theme="dark"] .dash-dropdown-content { background: var(--bg-card) !important; border: 0.5px solid var(--border-strong) !important; box-shadow: var(--shadow-md) !important; }
+[data-theme="dark"] .dash-dropdown-option { background: var(--bg-card) !important; color: var(--text-primary) !important; }
+[data-theme="dark"] .dash-dropdown-option:hover { background: var(--teal-light) !important; color: var(--teal) !important; }
+[data-theme="dark"] .dash-dropdown-trigger-icon { color: var(--text-muted) !important; }
+/* React Select fallback */
+[data-theme="dark"] .Select-control { background: var(--bg-input) !important; border: 0.5px solid var(--border-strong) !important; }
+[data-theme="dark"] .Select-value-label,
+[data-theme="dark"] .Select-placeholder,
+[data-theme="dark"] .Select--single .Select-value .Select-value-label { color: var(--text-primary) !important; }
+[data-theme="dark"] .Select-input input { color: var(--text-primary) !important; background: transparent !important; }
+[data-theme="dark"] .Select-menu-outer { background: var(--bg-card) !important; border: 0.5px solid var(--border-strong) !important; }
+[data-theme="dark"] .Select-option { background: var(--bg-card) !important; color: var(--text-primary) !important; }
+[data-theme="dark"] .Select-option.is-focused { background: var(--teal-light) !important; color: var(--teal) !important; }
+[data-theme="dark"] .Select-arrow { border-top-color: var(--text-muted) !important; }
+
+/* ── Pill controls ───────────────────────────────────────────────── */
+#live-badge { height: var(--ctrl-h) !important; padding: var(--ctrl-pad) !important; font-size: var(--ctrl-font) !important; font-weight: 500 !important; color: var(--teal) !important; background: var(--teal-light) !important; border: 0.5px solid var(--teal) !important; border-radius: var(--radius-pill) !important; display: inline-flex !important; align-items: center !important; gap: 5px !important; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: pulse 2s infinite; flex-shrink: 0; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+#manual-refresh-btn .bi-arrow-clockwise { display: inline-block; transition: transform 0.3s ease; }
+#manual-refresh-btn:active .bi-arrow-clockwise { animation: spin-icon 0.7s linear infinite; }
+@keyframes spin-icon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Dark/Light — same teal outline as Refresh and Export CSV */
+#theme-toggle-btn { height: var(--ctrl-h) !important; padding: var(--ctrl-pad) !important; font-size: var(--ctrl-font) !important; font-weight: 500 !important; border-radius: var(--radius-pill) !important; border: 0.5px solid var(--teal) !important; background: transparent !important; color: var(--teal) !important; display: inline-flex !important; align-items: center !important; gap: 5px !important; transition: all var(--transition) !important; }
+#theme-toggle-btn:hover { background: var(--teal) !important; color: #fff !important; border-color: var(--teal) !important; }
+
+#nav-last-updated { font-size: 0.7rem !important; color: var(--text-dim) !important; }
+
+.tw-group .btn { height: var(--ctrl-h) !important; padding: 0 11px !important; font-size: var(--ctrl-font) !important; font-weight: 500 !important; border: 0.5px solid var(--border) !important; border-radius: 0 !important; background: var(--bg-card) !important; color: var(--text-muted) !important; transition: all var(--transition) !important; }
+.tw-group .btn:first-child { border-radius: var(--radius-pill) 0 0 var(--radius-pill) !important; }
+.tw-group .btn:last-child  { border-radius: 0 var(--radius-pill) var(--radius-pill) 0 !important; }
+.tw-group .btn-success { background: var(--teal) !important; color: #fff !important; border-color: var(--teal) !important; }
+.tw-group .btn:not(.btn-success):hover { background: var(--teal-light) !important; color: var(--teal) !important; border-color: var(--teal) !important; }
+[data-theme="dark"] .tw-group .btn { background: var(--bg-card) !important; color: var(--text-muted) !important; border-color: var(--border) !important; }
+[data-theme="dark"] .tw-group .btn-success { background: var(--teal) !important; color: #fff !important; }
+
+.model-toggle-group .form-check-label { font-size: var(--ctrl-font) !important; color: var(--text-muted) !important; }
+[data-theme="dark"] .form-switch .form-check-input { background-color: var(--bg-input) !important; border-color: var(--border-strong) !important; }
+[data-theme="dark"] .form-switch .form-check-input:checked { background-color: var(--teal) !important; border-color: var(--teal) !important; }
+
+/* ── AI panel ─────────────────────────────────────────────────────── */
+.ai-message-assistant { background: var(--bg-sidebar) !important; border: 0.5px solid var(--border) !important; border-radius: 12px 12px 12px 2px; padding: 12px 16px; font-size: 0.83rem; line-height: 1.65; animation: fadeSlideIn 0.28s ease; color: var(--text-primary) !important; }
+.ai-message-user { background: var(--teal-light) !important; color: var(--text-primary) !important; border-radius: 12px 12px 2px 12px; padding: 10px 14px; font-size: 0.83rem; line-height: 1.6; animation: fadeSlideIn 0.22s ease; }
+@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.ai-chip { cursor: pointer !important; font-size: 0.72rem !important; padding: 3px 11px !important; border-radius: var(--radius-pill) !important; border: 0.5px solid var(--border) !important; background: var(--bg-primary) !important; color: var(--text-muted) !important; transition: all var(--transition) !important; white-space: nowrap !important; display: inline-block; }
+.ai-chip:hover { background: var(--teal-light) !important; color: var(--teal) !important; border-color: var(--teal) !important; }
+[data-theme="dark"] #ai-chat-history { background: var(--bg-primary) !important; }
+#ai-send-btn:hover { filter: brightness(1.1); }
+
+/* ── Causal insight — dark mode ───────────────────────────────────── */
+[data-theme="dark"] #causal-insight-card .alert { background: rgba(250,236,231,0.07) !important; border-color: rgba(240,153,123,0.25) !important; }
+[data-theme="dark"] #causal-insight-card .alert * { color: #f0b39a !important; }
+
+/* ── Tooltips ─────────────────────────────────────────────────────── */
+.tooltip-inner { font-size: 0.75rem !important; max-width: 240px !important; }
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 768px) { .vt-sidebar { width: 56px !important; min-width: 56px !important; } .sidebar-label, .sidebar-section-label { display: none !important; } }
+@media (max-width: 576px) { .vt-sidebar { display: none !important; } .vt-content { padding: 12px !important; } .vt-navbar { flex-wrap: wrap; gap: 8px; } }
+
+/* ── Skeleton loading states ──────────────────────────────────────── */
+/* Dash automatically sets data-dash-is-loading="true" on components  */
+/* while their callback is running. We use this to show a shimmer.    */
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* Shimmer on KPI values while loading */
+[data-dash-is-loading="true"] h3 {
+  color: transparent !important;
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    rgba(150,150,150,0.15) 50%,
+    var(--border) 75%
+  );
+  background-size: 400px 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: 6px;
+  min-width: 80px;
+  display: inline-block;
+}
+
+/* Shimmer on KPI unit labels while loading */
+[data-dash-is-loading="true"] small {
+  color: transparent !important;
+  background: var(--border);
+  border-radius: 4px;
+  min-width: 40px;
+  display: inline-block;
+}
+
+/* Shimmer on trend delta spans while loading */
+[data-dash-is-loading="true"] .trend-up,
+[data-dash-is-loading="true"] .trend-down,
+[data-dash-is-loading="true"] .trend-flat {
+  color: transparent !important;
+  background: var(--border);
+  border-radius: 4px;
+  min-width: 48px;
+  display: inline-block;
+}
+
+/* Chart area: show a subtle pulse while figure data is loading */
+[data-dash-is-loading="true"] .js-plotly-plot {
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
+}
+
+/* Chart card titles: don't shimmer (they don't change) */
+[data-dash-is-loading="true"] .card .fw-500,
+[data-dash-is-loading="true"] .card span[style*="fontWeight"] {
+  color: var(--text-primary) !important;
+  background: none !important;
+  animation: none !important;
+}
+
+/* Remove shimmer as soon as data arrives */
+.js-plotly-plot {
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+/* ── Export CSV + Refresh — identical teal outline pill ──────────── */
+/* Both use color="success" outline=True so Bootstrap base is the same.  */
+/* We override to ensure exact visual parity across light and dark modes. */
+#export-csv-btn,
+#manual-refresh-btn {
+  height: var(--ctrl-h) !important;
+  padding: var(--ctrl-pad) !important;
+  font-size: var(--ctrl-font) !important;
+  font-weight: 500 !important;
+  border-radius: var(--radius-pill) !important;
+  color: var(--teal) !important;
+  border: 0.5px solid var(--teal) !important;
+  background: transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  transition: all var(--transition) !important;
+  opacity: 1 !important;
+}
+#export-csv-btn:hover,
+#manual-refresh-btn:hover {
+  background: var(--teal) !important;
+  color: #fff !important;
+  border-color: var(--teal) !important;
+}
+
+/* ── Dark mode: stronger card/page contrast ───────────────────────── */
+/* Increase separation between bg-primary (#0c111a) and bg-card (#1c2438) */
+[data-theme="dark"] #vt-root      { background: #080d14 !important; }
+[data-theme="dark"] .vt-content   { background: #080d14 !important; }
+[data-theme="dark"] .card         { background: #1a2236 !important; border-color: rgba(255,255,255,0.13) !important; }
+[data-theme="dark"] .vt-navbar    { background: #1a2236 !important; border-bottom-color: rgba(255,255,255,0.10) !important; }
+[data-theme="dark"] .vt-sidebar   { background: #111826 !important; border-right-color: rgba(255,255,255,0.08) !important; }
+
+/* ── Dark mode: Dash 4 dropdown — definitive text fix ────────────── */
+/* Dash 4.2 renders the selected value in a button-like element.      */
+/* We target the wrapper and ALL descendants to ensure full coverage. */
+[data-theme="dark"] .dash-dropdown-wrapper {
+  background: #1e2d47 !important;
+  border: 0.5px solid rgba(255,255,255,0.22) !important;
+  border-radius: 8px !important;
+}
+/* Every text element inside the dropdown — cast wide */
+[data-theme="dark"] .dash-dropdown-wrapper,
+[data-theme="dark"] .dash-dropdown-wrapper *:not([class*="icon"]):not([class*="clear"]):not([class*="arrow"]) {
+  color: #f1f5ff !important;
+}
+/* Specifically target the value display (shown when closed) */
+[data-theme="dark"] .dash-dropdown-value,
+[data-theme="dark"] .dash-dropdown-value-item,
+[data-theme="dark"] .dash-dropdown-value-count {
+  color: #f1f5ff !important;
+  background: transparent !important;
+  -webkit-text-fill-color: #f1f5ff !important;
+}
+/* Focus state keeps text visible */
+[data-theme="dark"] .dash-dropdown-wrapper:focus-within {
+  border-color: var(--teal) !important;
+  outline: none !important;
+}
+/* Icons stay muted — not full white */
+[data-theme="dark"] .dash-dropdown-trigger-icon svg,
+[data-theme="dark"] .dash-dropdown-clear svg {
+  color: rgba(255,255,255,0.5) !important;
+  fill: rgba(255,255,255,0.5) !important;
+}
+/* Open menu */
+[data-theme="dark"] .dash-dropdown-content {
+  background: #1a2236 !important;
+  border: 0.5px solid rgba(255,255,255,0.22) !important;
+  z-index: 9999;
+}
+[data-theme="dark"] .dash-dropdown-option {
+  background: #1a2236 !important;
+  color: #f1f5ff !important;
+}
+[data-theme="dark"] .dash-dropdown-option:hover,
+[data-theme="dark"] .dash-dropdown-option[aria-selected="true"] {
+  background: var(--teal-light) !important;
+  color: var(--teal) !important;
+}
+/* Search input inside dropdown */
+[data-theme="dark"] .dash-dropdown-search input {
+  color: #f1f5ff !important;
+  background: transparent !important;
+  -webkit-text-fill-color: #f1f5ff !important;
+}

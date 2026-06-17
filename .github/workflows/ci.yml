@@ -1,0 +1,202 @@
+# ──────────────────────────────────────────────────────────────────────────────
+#  VoltEdge — CI Pipeline
+#  Runs on every push to main/develop and every pull request.
+#  Stages: lint → type-check → test → build → docker-smoke
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  PYTHON_VERSION: "3.11"
+  ENVIRONMENT: "development"
+  CLOUD_PROVIDER: "local"
+  LOG_FORMAT: "console"
+  LOG_LEVEL: "WARNING"
+
+jobs:
+
+  # ── 1. Lint & format ────────────────────────────────────────────────────────
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install lint tools
+        run: pip install ruff
+
+      - name: Ruff lint
+        run: ruff check voltedge/ tests/ config/
+
+      - name: Ruff format check
+        run: ruff format --check voltedge/ tests/ config/
+
+  # ── 2. Type check ────────────────────────────────────────────────────────────
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install mypy pydantic pydantic-settings pandas-stubs
+
+      - name: mypy
+        run: mypy voltedge/ config/ --ignore-missing-imports --no-strict-optional
+
+  # ── 3. Tests ─────────────────────────────────────────────────────────────────
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio moto[s3] faker
+
+      - name: Run tests (excluding slow LSTM)
+        run: |
+          pytest tests/ \
+            --ignore=tests/test_models/test_lstm \
+            --cov=voltedge \
+            --cov-report=term-missing \
+            --cov-report=xml \
+            --cov-fail-under=70 \
+            -q
+
+      - name: Upload coverage
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ── 4. LSTM tests (slow — separate job) ────────────────────────────────────
+  test-lstm:
+    name: LSTM Model Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies (with TensorFlow)
+        run: |
+          pip install -r requirements.txt
+          pip install tensorflow pytest pytest-asyncio
+
+      - name: Run LSTM tests
+        run: pytest tests/test_models/test_lstm/ -v --timeout=600
+
+  # ── 5. Build package ────────────────────────────────────────────────────────
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Build wheel
+        run: |
+          pip install build
+          python -m build --wheel
+          ls -lh dist/
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: voltedge-wheel
+          path: dist/*.whl
+
+  # ── 6. Docker smoke test ─────────────────────────────────────────────────────
+  docker:
+    name: Docker Build & Smoke Test
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t voltedge:ci .
+
+      - name: Smoke test — health endpoint
+        run: |
+          docker run -d --name voltedge-ci -p 8000:8000 \
+            -e ENVIRONMENT=development \
+            -e CLOUD_PROVIDER=local \
+            voltedge:ci \
+            uvicorn voltedge.api.app:app --host 0.0.0.0 --port 8000
+
+          # Wait for startup (max 30s)
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8000/health; then
+              echo "Health OK"
+              break
+            fi
+            sleep 1
+          done
+
+          # Verify response
+          curl -sf http://localhost:8000/health | grep '"status":"ok"'
+          docker stop voltedge-ci
+
+  # ── 7. Security scan ─────────────────────────────────────────────────────────
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install bandit
+        run: pip install bandit
+
+      - name: Run bandit (SAST)
+        run: |
+          bandit -r voltedge/ \
+            --skip B101,B311 \
+            --severity-level medium \
+            --confidence-level medium \
+            -q

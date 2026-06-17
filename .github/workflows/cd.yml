@@ -1,0 +1,128 @@
+# ──────────────────────────────────────────────────────────────────────────────
+#  VoltEdge — CD Pipeline
+#  Deploys to staging on merge to develop; to production on tagged release.
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: CD
+
+on:
+  push:
+    tags:
+      - "v*.*.*"       # Production: v1.1.0, v2.0.0, etc.
+  workflow_dispatch:   # Manual trigger for staging
+
+env:
+  PYTHON_VERSION: "3.11"
+  ECR_REPOSITORY: voltedge
+  AWS_REGION: eu-west-1
+
+jobs:
+
+  # ── 1. Determine environment ─────────────────────────────────────────────────
+  context:
+    name: Deployment Context
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      version:     ${{ steps.env.outputs.version }}
+    steps:
+      - id: env
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "version=${{ github.ref_name }}"  >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "version=staging-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          fi
+
+  # ── 2. Build & push image ────────────────────────────────────────────────────
+  push-image:
+    name: Push Docker Image
+    runs-on: ubuntu-latest
+    needs: context
+    environment: ${{ needs.context.outputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG:    ${{ needs.context.outputs.version }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          # Also tag as latest for the target environment
+          docker tag  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+                      $ECR_REGISTRY/$ECR_REPOSITORY:${{ needs.context.outputs.environment }}-latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ needs.context.outputs.environment }}-latest
+
+  # ── 3. Deploy to AWS Elastic Beanstalk ───────────────────────────────────────
+  deploy:
+    name: Deploy to ${{ needs.context.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs: [context, push-image]
+    environment: ${{ needs.context.outputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          pip install awsebcli
+          eb deploy voltedge-${{ needs.context.outputs.environment }} \
+            --label ${{ needs.context.outputs.version }}
+
+      - name: Post-deploy health check
+        run: |
+          URL=${{ secrets.APP_URL }}
+          for i in $(seq 1 12); do
+            STATUS=$(curl -sf $URL/health | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])" 2>/dev/null)
+            if [ "$STATUS" = "ok" ]; then
+              echo "✅ Health check passed"
+              exit 0
+            fi
+            echo "Waiting... ($i/12)"
+            sleep 10
+          done
+          echo "❌ Health check failed"
+          exit 1
+
+  # ── 4. Notify ────────────────────────────────────────────────────────────────
+  notify:
+    name: Notify Slack
+    runs-on: ubuntu-latest
+    needs: [context, deploy]
+    if: always()
+
+    steps:
+      - name: Send deployment notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOY_WEBHOOK }}
+          STATUS:  ${{ needs.deploy.result }}
+          ENV:     ${{ needs.context.outputs.environment }}
+          VERSION: ${{ needs.context.outputs.version }}
+        run: |
+          EMOJI=$([ "$STATUS" = "success" ] && echo "✅" || echo "❌")
+          curl -s -X POST $SLACK_WEBHOOK_URL \
+            -H "Content-Type: application/json" \
+            -d "{\"text\": \"$EMOJI VoltEdge *$VERSION* deployed to *$ENV* — $STATUS\"}"

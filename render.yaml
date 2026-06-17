@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: voltedge-demo
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PYTHONPATH
+        value: /app
+      - key: ANTHROPIC_API_KEY
+        sync: false
+    healthCheckPath: /
+    autoDeploy: true

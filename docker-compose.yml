@@ -1,0 +1,54 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  VoltEdge — Docker Compose (Development)
+#  Provides: app dashboard + optional LocalStack (AWS emulation)
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+services:
+
+  # ── VoltEdge Dashboard ─────────────────────────────────────────────────────
+  voltedge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: voltedge-app
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./data:/app/data           # Persist data across restarts
+      - ./.env:/app/.env:ro        # Mount secrets (read-only)
+    environment:
+      - ENVIRONMENT=development
+      - CLOUD_PROVIDER=local
+      - DASHBOARD_HOST=0.0.0.0
+      - LOG_FORMAT=console
+    depends_on:
+      - localstack
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8050"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── LocalStack (AWS S3 emulation — free tier simulation) ──────────────────
+  localstack:
+    image: localstack/localstack:3.4
+    container_name: voltedge-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=eu-west-1
+      - DEBUG=0
+    volumes:
+      - localstack-data:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  localstack-data:

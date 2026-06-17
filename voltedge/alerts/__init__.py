@@ -1,0 +1,1 @@
+"""VoltEdge — Alert Webhooks package."""
